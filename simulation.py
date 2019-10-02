@@ -23,21 +23,24 @@ class Simulation(object):
         You will need to keep track of the number of people currently infected with the disease.
         The total infected people is the running total that have been infected since the
         simulation began, including the currently infected people who died.
-        You will also need to keep track of the number of people that have die as a result
+        You will also need to keep track of the number of people that have died as a result
         of the infection.
 
         All arguments will be passed as command-line arguments when the file is run.
         HINT: Look in the if __name__ == "__main__" function at the bottom.
         '''
-        # TODO: Create a Logger object and bind it to self.logger.
-        # Remember to call the appropriate logger method in the corresponding parts of the simulation.
-        # TODO: Call self._create_population() and pass in the correct parameters.
-        # Store the array that this method will return in the self.population attribute.
+
         # TODO: Store each newly infected person's ID in newly_infected attribute.
         # At the end of each time step, call self._infect_newly_infected()
         # and then reset .newly_infected back to an empty list.
-        self.logger = None
-        self.population = [] # List of Person objects
+
+
+        # Remember to call the appropriate logger method in the corresponding parts of the simulation.
+        # Log data to file
+        self.logger = Logger("logfile.txt")
+        # Stores created population in self.population attribute
+        self.population = self._create_population(initial_infected)
+
         self.pop_size = pop_size # Int
         self.next_person_id = 0 # Int
         self.virus = virus # Virus object
@@ -58,17 +61,35 @@ class Simulation(object):
 
             Returns:
                 list: A list of Person objects.
-
         '''
-        # TODO: Finish this method!  This method should be called when the simulation
-        # begins, to create the population that will be used. This method should return
-        # an array filled with Person objects that matches the specifications of the
-        # simulation (correct number of people in the population, correct percentage of
-        # people vaccinated, correct number of initially infected people).
+        
+        #Array of persons
+        population = []
+        #Get count of vaccinated people
+        vacc_count = self.pop_size * self.vacc_percentage
+        #Add vaccinated people to population
+        for i in range(vacc_count):
+            population.append(Person(self.next_person_id, True))
+            self.next_person_id += 1
+        
+        #Add infected people to population
+        for i in range(self.initial_infected):
+            populaton.append(Person(self.next_person_id, False, self.virus))
+            self.next_person_id += 1
 
-        # Use the attributes created in the init method to create a population that has
-        # the correct intial vaccination percentage and initial infected.
-        pass
+        #Add rest of population
+        for person in range(self.pop_size - vacc_count - initial_infected):
+            population.append(Person(self.next_person_id, False))
+            self.next_person_id += 1
+
+        #Test if pop_size is same as population size
+        if self.pop_size == len(self.population):
+            print("Population is right size")
+        else:
+            print("Population is not right size")
+        
+        #List of population
+        return population
 
     def _simulation_should_continue(self):
         ''' The simulation should only end if the entire population is dead
