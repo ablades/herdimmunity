@@ -81,12 +81,6 @@ class Simulation(object):
         for person in range(self.pop_size - vacc_count - initial_infected):
             population.append(Person(self.next_person_id, False))
             self.next_person_id += 1
-
-        #Test if pop_size is same as population size
-        if self.pop_size == len(self.population):
-            print("Population is right size")
-        else:
-            print("Population is not right size")
         
         #List of population
         return population
@@ -98,28 +92,46 @@ class Simulation(object):
             Returns:
                 bool: True for simulation should continue, False if it should end.
         '''
-        # TODO: Complete this helper method.  Returns a Boolean.
-        pass
+        #Check if everyone is dead
+        if self.total_dead == self.pop_size:
+            return False
 
+        #Get count of population that is alive and vaccinated
+        vacc_count = 0
+        for person in self.population:
+            if person.is_alive and person.is_vaccinated:
+                vacc_count += 1
+
+        #Check if all survivors are vaccinated 
+        if vacc_count == self.pop_size - self.total_dead:
+            #All survivors are vaccinated
+            return False
+
+        return True
+
+
+            
     def run(self):
         ''' This method should run the simulation until all requirements for ending
         the simulation are met.
         '''
-        # TODO: Finish this method.  To simplify the logic here, use the helper method
-        # _simulation_should_continue() to tell us whether or not we should continue
-        # the simulation and run at least 1 more time_step.
-
-        # TODO: Keep track of the number of time steps that have passed.
         # HINT: You may want to call the logger's log_time_step() method at the end of each time step.
         # TODO: Set this variable using a helper
         time_step_counter = 0
-        should_continue = None
+        should_continue = self._simulation_should_continue()
 
         while should_continue:
-        # TODO: for every iteration of this loop, call self.time_step() to compute another
-        # round of this simulation.
+            #Round of simulation
+            self.time_step()
+            time_step_counter += 1
+
+            #Log the current timestep
+            Logger.log_time_step(time_step_counter)
+
+            #Check population
+            should_continue = self._simulation_should_continue()
+
         print('The simulation has ended after {time_step_counter} turns.'.format(time_step_counter))
-        pass
 
     def time_step(self):
         ''' This method should contain all the logic for computing one time step
