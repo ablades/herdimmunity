@@ -36,8 +36,7 @@ class Simulation(object):
 
 
         # Remember to call the appropriate logger method in the corresponding parts of the simulation.
-        # Log data to file
-        self.logger = Logger("logfile.txt")
+
         # Stores created population in self.population attribute
         self.population = self._create_population(initial_infected)
 
@@ -52,6 +51,10 @@ class Simulation(object):
         self.file_name = "{}_simulation_pop_{}_vp_{}_infected_{}.txt".format(
             virus_name, population_size, vacc_percentage, initial_infected)
         self.newly_infected = []
+
+        #Create Logger and write metadata
+        self.logger = Logger(self.file_name)
+        self.logger.write_metadata(self.pop_size,self.vacc_percentage,self.virus.name, self.virus.mortality_rate, self.virus.repro_rate)
 
     def _create_population(self, initial_infected):
         '''This method will create the initial population.
@@ -123,11 +126,12 @@ class Simulation(object):
         while should_continue:
             #Round of simulation
             self.time_step()
-            time_step_counter += 1
 
             #Log the current timestep
-            Logger.log_time_step(time_step_counter)
+            self.logger.log_time_step(time_step_counter,)
 
+            #increment time step
+            time_step_counter += 1
             #Check population
             should_continue = self._simulation_should_continue()
 
@@ -138,15 +142,27 @@ class Simulation(object):
         in the simulation.
 
         This includes:
-            1. 100 total interactions with a randon person for each infected person
+            1. 100 total interactions with a random person for each infected person
                 in the population
             2. If the person is dead, grab another random person from the population.
                 Since we don't interact with dead people, this does not count as an interaction.
             3. Otherwise call simulation.interaction(person, random_person) and
                 increment interaction counter by 1.
             '''
-        # TODO: Finish this method.
-        pass
+
+        for person in self.population:
+            #If person is alive and has infection, interact
+            if person.is_alive and person.infection is not None:
+
+                interactions = 0
+                while(interactions < 100):
+                    #randomly select member  of the population
+                    rand_person = self.population[random.randrange(0, self.pop_size)]
+
+                    #counts as an interaction
+                    if rand_person.is_alive:
+                        interactions +=1
+                        self.interaction(person, rand_person)
 
     def interaction(self, person, random_person):
         '''This method should be called any time two living people are selected for an
