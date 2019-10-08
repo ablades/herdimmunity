@@ -152,7 +152,7 @@ class Simulation(object):
 
         for person in self.population:
             #If person is alive and has infection, interact
-            if person.is_alive and person.infection is not None:
+            if person.is_alive and person.infection:
 
                 interactions = 0
                 while(interactions < 100):
@@ -177,19 +177,21 @@ class Simulation(object):
         assert person.is_alive == True
         assert random_person.is_alive == True
 
-        # TODO: Finish this method.
-        #  The possible cases you'll need to cover are listed below:
-            # random_person is vaccinated:
-            #     nothing happens to random person.
-            # random_person is already infected:
-            #     nothing happens to random person.
-            # random_person is healthy, but unvaccinated:
-            #     generate a random number between 0 and 1.  If that number is smaller
-            #     than repro_rate, random_person's ID should be appended to
-            #     Simulation object's newly_infected array, so that their .infected
-            #     attribute can be changed to True at the end of the time step.
-        # TODO: Call slogger method during this method.
-        pass
+        #random_person is vaccinated
+        if random_person.is_vaccinated:
+            self.logger.log_interaction(person, random_person, random_person_sick=False, random_person_vacc=True, did_infect=True)
+        #random_person is already infected
+        elif random_person.infection:
+            self.logger.log_interaction(person, random_person, random_person_sick=True, random_person_vacc=False, did_infect=True)
+        #random_person has a chance of recieving infection
+        elif random_person.infection is None and random_person.is_vaccinated == False:
+            #random_person survived contact with infection
+            if random_person.did_survive_infection():
+                self.logger.log_interaction(person, random_person, False, False, False)
+            #person has been infected add id to become newly infected list
+            else:
+                self.logger.log_interaction(False, False, True)
+                self.newly_infected.append(random_person._id)
 
     def _infect_newly_infected(self):
         ''' This method should iterate through the list of ._id stored in self.newly_infected
