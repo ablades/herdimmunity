@@ -85,5 +85,19 @@ class Logger(object):
         pass
 
 def test_constructor():
-    log = Logger('test.txt')
-    assert log.file_name == 'test.txt'
+    log = Logger('test1.txt')
+    assert log.file_name == 'test1.txt'
+
+def test_write_meta_data():
+    log = Logger('test2.txt')
+    log.write_metadata(100000, 0.90, "Ebola", 0.70, 0.25)
+
+    #Read test file
+    with open('test2.txt', 'r') as f:
+        test_data = f.read()
+
+    assert test_data == f"100000\t0.9\tEbola\t0.7\t0.25\n"
+
+#def test_log_interaction():
+#    log = Logger('test3.txt')
+#    assert log.
