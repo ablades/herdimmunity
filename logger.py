@@ -1,3 +1,6 @@
+import os
+from person import Person
+
 class Logger(object):
     ''' Utility class responsible for logging all interactions during the simulation. '''
     # TODO: Write a test suite for this class to make sure each method is working
@@ -35,17 +38,16 @@ class Logger(object):
             "{person.ID} didn't infect {random_person.ID} because {'vaccinated' or 'already sick'} \n"
         '''
         with open(self.file_name, 'a') as f:
-            f.write(f"{person._id} infects {random_person._id}\n")
 
             #Random person is already sick
             if random_person_sick == True and did_infect == True:
                 f.write(f"{person._id} didn't infect {random_person._id} because already sick \n")
-            #Random person is vaccinated 
-            elif random_person_vacc == True:
-                f.write(f"{person._id} didn't infect {random_person._id} because vaccinated \n")
+            #Random person is vaccinated and infected
+            elif random_person_vacc == True and did_infect == True:
+                f.write(f"{person._id} didn't infect {random_person._id} because already vaccinated \n")
             #Random person was not infected
             elif did_infect == False:
-                f.write(f"{person._id} didn't infect {random_person._id}")
+                f.write(f"{person._id} didn't infect {random_person._id} \n")
             #Random person is not vaccinated or sick and is just infected
             elif did_infect == True:
                 f.write(f"{person._id} infects {random_person._id} \n")
@@ -98,6 +100,34 @@ def test_write_meta_data():
 
     assert test_data == f"100000\t0.9\tEbola\t0.7\t0.25\n"
 
-#def test_log_interaction():
-#    log = Logger('test3.txt')
-#    assert log.
+    os.remove('test2.txt')
+
+
+def test_log_interaction():
+    log = Logger('test3.txt')
+
+    person = Person(1, True)
+    random_person = Person(2, False)
+    #Person not sick and not vaccinated but infected
+    log.log_interaction(person, random_person, random_person_sick=False, random_person_vacc=False, did_infect=True)
+    #Person is vaccinated and did infect
+    log.log_interaction(person, random_person, random_person_sick=False, random_person_vacc=True, did_infect=True)
+    #Person is not vaccinated but is not infected
+    log.log_interaction(person, random_person, random_person_sick=False, random_person_vacc=False, did_infect=False)
+    #Person is sick and did get infected
+    log.log_interaction(person, random_person, random_person_sick=True, random_person_vacc=False, did_infect=True)
+
+    with open('test3.txt', 'r') as f:
+        test_data = f.read()
+
+    assert test_data == ("1 infects 2 \n" +
+                        "1 didn't infect 2 because already vaccinated \n" +
+                        "1 didn't infect 2 \n" +
+                        "1 didn't infect 2 because already sick \n")
+
+    os.remove('test3.txt')
+    
+
+
+
+    
