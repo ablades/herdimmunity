@@ -61,10 +61,12 @@ class Logger(object):
         The format of the log should be:
             "{person.ID} died from infection\n" or "{person.ID} survived infection.\n"
         '''
-        # TODO: Finish this method. If the person survives, did_die_from_infection
-        # should be False.  Otherwise, did_die_from_infection should be True.
-        # Append the results of the infection to the logfile
-        pass
+        with open(self.file_name, 'a') as f:
+            if did_die_from_infection:
+                f.write(f"{person._id} died from infection\n")
+            else:
+                f.write(f"{person._id} survived infection\n")
+
 
     def log_time_step(self, time_step_number):
         ''' STRETCH CHALLENGE DETAILS:
@@ -126,6 +128,26 @@ def test_log_interaction():
                         "1 didn't infect 2 because already sick \n")
 
     os.remove('test3.txt')
+
+def test_log_infection_survival():
+    log = Logger('test4.txt')
+    person = Person(1, True)
+    person2 = Person(2, False)
+
+    log.log_infection_survival(person, True)
+    log.log_infection_survival(person, False)
+    log.log_infection_survival(person2, True)
+    log.log_infection_survival(person2, False)
+
+    with open('test4.txt', 'r') as f:
+        test_data = f.read()
+    
+    assert test_data == ("1 died from infection\n" +
+                        "1 survived infection\n" +
+                        "2 died from infection\n" +
+                        "2 survived infection\n")
+
+    os.remove('test4.txt')
     
 
 
