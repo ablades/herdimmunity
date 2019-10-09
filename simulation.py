@@ -223,7 +223,6 @@ class Simulation(object):
 def test_constructor():
     v = Virus("Test", .25, .25)
     sim = Simulation(100, .25, v, initial_infected=4)
-    #assert len(sim.population) == 100
     assert sim.next_person_id == 100
     assert sim.total_infected == 4
     assert sim.vacc_percentage == .25
@@ -260,6 +259,35 @@ def test_create_population():
     #verify correct number of infected and vaccinated people
     assert v_count == 25
     assert i_count == 4
+    assert len(sim.population) == 100
+
+def test_simulation_should_continue():
+    v = Virus("Test", .25, .25)
+    sim = Simulation(100, .25, v, initial_infected=4)
+    sim1 = Simulation(100, .25, v, initial_infected=4)
+    sim2 = Simulation(100, .25, v, initial_infected=4)
+
+    #Check if all are dead
+    sim.total_dead = 100
+    assert sim._simulation_should_continue() == False
+
+    #make everyone vaccinated
+    for person in sim1.population:
+        person.is_vaccinated = True
+
+    assert sim1._simulation_should_continue() == False
+
+    #check that all survivors are vaccinated
+    for person in sim2.population:
+        person.is_vaccinated = True
+
+    #kill off 3 people
+    sim2.population[0].is_alive = False
+    sim2.population[90].is_alive = False
+    sim2.population[86].is_alive = False
+    sim2.total_dead = 3
+    assert sim2._simulation_should_continue() == False
+
 
 
 
