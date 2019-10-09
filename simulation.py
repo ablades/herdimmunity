@@ -87,15 +87,19 @@ class Simulation(object):
             Returns:
                 bool: True for simulation should continue, False if it should end.
         '''
-        #Check if everyone is dead
-        if self.total_dead == self.pop_size:
-            return False
-
         #Get count of population that is alive and vaccinated
         vacc_count = 0
+        self.total_dead = 0
         for person in self.population:
             if person.is_alive and person.is_vaccinated:
                 vacc_count += 1
+
+            if person.is_alive == False:
+                self.total_dead += 1
+
+        #Check if everyone is dead
+        if self.total_dead == self.pop_size:
+            return False
 
         #Check if all survivors are vaccinated 
         if vacc_count == self.pop_size - self.total_dead:
@@ -268,7 +272,9 @@ def test_simulation_should_continue():
     sim2 = Simulation(100, .25, v, initial_infected=4)
 
     #Check if all are dead
-    sim.total_dead = 100
+    for person in sim.population:
+        person.is_alive = False
+
     assert sim._simulation_should_continue() == False
 
     #make everyone vaccinated
