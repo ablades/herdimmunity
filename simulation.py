@@ -13,7 +13,7 @@ class Simulation(object):
     population that are vaccinated, the size of the population, and the amount of initially
     infected people in a population are all variables that can be set when the program is run.
     '''
-    def __init__(self, pop_size, vacc_percentage, initial_infected=1, virus):
+    def __init__(self, population_size, v_percentage, virus, initial_infected=1):
         ''' Logger object logger records all events during the simulation.
         Population represents all Persons in the population.
         The next_person_id is the next available id for all created Persons,
@@ -30,20 +30,19 @@ class Simulation(object):
         HINT: Look in the if __name__ == "__main__" function at the bottom.
         '''
         # Stores created population in self.population attribute
-        self.population = self._create_population(initial_infected)
-
-        self.pop_size = pop_size # Int
+    
         self.next_person_id = 0 # Int
         self.virus = virus # Virus object
+        self.pop_size = population_size # Int
         self.initial_infected = initial_infected # Int
         self.total_infected = initial_infected# Int
         self.current_infected = initial_infected # Int
-        self.vacc_percentage = vacc_percentage # float between 0 and 1
+        self.vacc_percentage = v_percentage # float between 0 and 1
         self.total_dead = 0 # Int
-        self.file_name = "{}_simulation_pop_{}_vp_{}_infected_{}.txt".format(
-            virus_name, population_size, vacc_percentage, initial_infected)
+        self.file_name = f"{virus.name}_simulation_pop_{self.pop_size}_vp_{self.vacc_percentage}_infected_{self.initial_infected}.txt"
         self.newly_infected = []
         self.newly_dead = []
+        self.population = self._create_population(self.initial_infected)
 
         #Create Logger and write metadata
         self.logger = Logger(self.file_name)
@@ -60,26 +59,26 @@ class Simulation(object):
         '''
         
         #Array of persons
-        population = []
+        self.population = []
         #Get count of vaccinated people
-        vacc_count = self.pop_size * self.vacc_percentage
+        vacc_count = int(self.pop_size * self.vacc_percentage)
         #Add vaccinated people to population
         for i in range(vacc_count):
-            population.append(Person(self.next_person_id, True))
+            self.population.append(Person(self.next_person_id, True))
             self.next_person_id += 1
         
         #Add infected people to population
         for i in range(self.initial_infected):
-            populaton.append(Person(self.next_person_id, False, self.virus))
+            self.population.append(Person(self.next_person_id, False, self.virus))
             self.next_person_id += 1
 
         #Add rest of population
         for person in range(self.pop_size - vacc_count - initial_infected):
-            population.append(Person(self.next_person_id, False))
+            self.population.append(Person(self.next_person_id, False))
             self.next_person_id += 1
         
         #List of population
-        return population
+        return self.population
 
     def _simulation_should_continue(self):
         ''' The simulation should only end if the entire population is dead
@@ -220,6 +219,49 @@ class Simulation(object):
         self.newly_infected = []
         self.newly_dead = []
 
+#Test constructor
+def test_constructor():
+    v = Virus("Test", .25, .25)
+    sim = Simulation(100, .25, v, initial_infected=4)
+    #assert len(sim.population) == 100
+    assert sim.next_person_id == 100
+    assert sim.total_infected == 4
+    assert sim.vacc_percentage == .25
+    assert sim.virus == v
+    assert sim.initial_infected == 4
+    assert sim.current_infected == 4
+    assert sim.total_dead == 0
+    assert sim.file_name == "Test_simulation_pop_100_vp_0.25_infected_4.txt"
+    assert sim.newly_infected == []
+    assert sim.newly_dead == []
+
+
+#Test create population 
+def test_create_population():
+    v = Virus("Test", .25, .25)
+    sim = Simulation(100, .25, v, initial_infected=4)
+    #vaccinated count
+    v_count = 0
+    #infected count
+    i_count = 0
+
+    #Check entire population
+    for person in sim.population:
+        #Make sure everyone is alive in population at start
+        assert person.is_alive == True
+
+        #count number of vaccinated people
+        if person.is_vaccinated:
+            v_count += 1
+        #person has infection
+        if person.infection is not None:
+            i_count += 1
+
+    #verify correct number of infected and vaccinated people
+    assert v_count == 25
+    assert i_count == 4
+
+
 
 if __name__ == "__main__":
     params = sys.argv[1:]
@@ -235,7 +277,7 @@ if __name__ == "__main__":
     else:
         initial_infected = 1
 
-    virus = Virus(name, repro_rate, mortality_rate)
+    virus = Virus(virus_name, repro_num, mortality_rate)
     sim = Simulation(pop_size, vacc_percentage, initial_infected, virus)
 
     sim.run()
