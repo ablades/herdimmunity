@@ -13,7 +13,7 @@ class Simulation(object):
     population that are vaccinated, the size of the population, and the amount of initially
     infected people in a population are all variables that can be set when the program is run.
     '''
-    def __init__(self, population_size, v_percentage, virus, initial_infected=1):
+    def __init__(self, population_size, v_percentage, v, initial_infected=1):
         ''' Logger object logger records all events during the simulation.
         Population represents all Persons in the population.
         The next_person_id is the next available id for all created Persons,
@@ -32,14 +32,14 @@ class Simulation(object):
         # Stores created population in self.population attribute
     
         self.next_person_id = 0 # Int
-        self.virus = virus # Virus object
+        self.virus = v # Virus object
         self.pop_size = population_size # Int
         self.initial_infected = initial_infected # Int
         self.total_infected = initial_infected# Int
         self.current_infected = initial_infected # Int
         self.vacc_percentage = v_percentage # float between 0 and 1
         self.total_dead = 0 # Int
-        self.file_name = f"{virus.name}_simulation_pop_{self.pop_size}_vp_{self.vacc_percentage}_infected_{self.initial_infected}.txt"
+        self.file_name = f"{self.virus.name}_simulation_pop_{self.pop_size}_vp_{self.vacc_percentage}_infected_{self.initial_infected}.txt"
         self.newly_infected = []
         self.newly_dead = []
         self.population = self._create_population(self.initial_infected)
@@ -90,6 +90,8 @@ class Simulation(object):
         #Get count of population that is alive and vaccinated
         vacc_count = 0
         self.total_dead = 0
+        infected_count = 0
+        
         for person in self.population:
             if person.is_alive and person.is_vaccinated:
                 vacc_count += 1
@@ -97,14 +99,19 @@ class Simulation(object):
             if person.is_alive == False:
                 self.total_dead += 1
 
-        #Check if everyone is dead
-        if self.total_dead == self.pop_size:
+            if person.infection is not None:
+                infected_count += 1
+
+        #Check if everyone is dead or no more people are infected
+        if self.total_dead == self.pop_size or infected_count == 0:
             return False
 
         #Check if all survivors are vaccinated 
         if vacc_count == self.pop_size - self.total_dead:
             #All survivors are vaccinated
             return False
+
+        
 
         return True
 
@@ -115,9 +122,8 @@ class Simulation(object):
         the simulation are met.
         '''
         time_step_counter = 0
-        should_continue = self._simulation_should_continue()
 
-        while should_continue:
+        while self._simulation_should_continue():
             #Round of simulation
             self.time_step()
 
@@ -127,8 +133,6 @@ class Simulation(object):
             self._infect_newly_infected()
             #increment time step
             time_step_counter += 1
-            #Check population
-            should_continue = self._simulation_should_continue()
 
         print(f"The simulation has ended after {time_step_counter} turns.")
 
@@ -193,7 +197,7 @@ class Simulation(object):
 
         #Check if random_person has virus
         r_person_sick = False
-        if random_person.virus is None:
+        if random_person.infection is None:
             r_person_sick = False
         else:
             r_person_sick = True
@@ -226,12 +230,12 @@ class Simulation(object):
 
 if __name__ == "__main__":
     params = sys.argv[1:]
-    virus_name = str(params[0])
-    repro_num = float(params[1])
-    mortality_rate = float(params[2])
+    virus_name = str(params[2])
+    repro_num = float(params[4])
+    mortality_rate = float(params[3])
 
-    pop_size = int(params[3])
-    vacc_percentage = float(params[4])
+    pop_size = int(params[0])
+    vacc_percentage = float(params[1])
 
     if len(params) == 6:
         initial_infected = int(params[5])
@@ -239,6 +243,6 @@ if __name__ == "__main__":
         initial_infected = 1
 
     virus = Virus(virus_name, repro_num, mortality_rate)
-    sim = Simulation(pop_size, vacc_percentage, initial_infected, virus)
+    sim = Simulation(pop_size, vacc_percentage, virus,initial_infected)
 
     sim.run()

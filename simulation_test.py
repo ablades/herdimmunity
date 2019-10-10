@@ -76,3 +76,29 @@ def test_simulation_should_continue():
     sim2.population[86].is_alive = False
     sim2.total_dead = 3
     assert sim2._simulation_should_continue() == False
+
+def test_run():
+    v = Virus("Test", .25, .25)
+    sim = Simulation(100, .25, v, initial_infected=4)
+
+   def run(self):
+        ''' This method should run the simulation until all requirements for ending
+        the simulation are met.
+        '''
+        time_step_counter = 0
+        should_continue = self._simulation_should_continue()
+
+        while should_continue:
+            #Round of simulation
+            self.time_step()
+
+            #Log the current timestep
+            self.logger.log_time_step(time_step_counter, len(self.newly_infected), len(self.newly_dead),self.total_infected, self.total_dead)
+
+            self._infect_newly_infected()
+            #increment time step
+            time_step_counter += 1
+            #Check population
+            should_continue = self._simulation_should_continue()
+
+        print(f"The simulation has ended after {time_step_counter} turns.")
