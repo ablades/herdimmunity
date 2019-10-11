@@ -134,7 +134,8 @@ class Simulation(object):
             #increment time step
             time_step_counter += 1
 
-        print(f"The simulation has ended after {time_step_counter} turns.")
+        print(f"The simulation has ended after {time_step_counter} turns.\n")
+        print(f"Population: {self.pop_size} Total Dead: {self.total_dead} Total Infected: {self.total_infected}\n")
 
     def time_step(self):
         ''' This method should contain all the logic for computing one time step
@@ -222,6 +223,7 @@ class Simulation(object):
         for person_id in self.newly_infected:
             self.population[person_id].infection = self.virus
             self.current_infected += 1
+            self.total_infected += 1
 
         #reset newly lists
         self.newly_infected = []

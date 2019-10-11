@@ -63,7 +63,6 @@ def test_log_infection_survival():
                         "2 survived infection\n")
 
     os.remove('test4.txt')
-    
 
 
 
